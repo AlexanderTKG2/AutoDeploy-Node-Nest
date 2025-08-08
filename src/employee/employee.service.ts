@@ -1,33 +1,45 @@
 import { Injectable } from '@nestjs/common';
+import { EntityManager, Repository } from 'typeorm';
+import { Employee } from './entities/employee.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import {
+  CreateEmployeeData,
+  UpdateEmployeeData,
+} from './models/employeeModels';
 
 @Injectable()
 export class EmployeeService {
-  private readonly mockEmployees = [
-    {
-      id: 1,
-      firstName: 'John',
-      lastName: 'Doe',
-      position: 'Worker',
-      salary: 10000,
-      workEmail: 'email@example.com',
-      personalEmail: 'email@example.com',
-      personalPhone: '9999000000',
-      country: 'Mexico',
-    },
-    {
-      id: 2,
-      firstName: 'Joe',
-      lastName: 'Swanson',
-      position: 'Policeman',
-      salary: 10,
-      workEmail: 'email1@example.com',
-      personalEmail: 'email1@example.com',
-      personalPhone: '9991000000',
-      country: 'Canada',
-    },
-  ];
+  constructor(
+    @InjectRepository(Employee)
+    private readonly employeeRepository: Repository<Employee>,
+    private readonly entityManager: EntityManager,
+  ) {}
 
-  findAll() {
-    return this.mockEmployees;
+  async findAll() {
+    const employees = await this.employeeRepository.find();
+    return employees;
+  }
+
+  async create(createEmployeeDto: CreateEmployeeData) {
+    createEmployeeDto.createdAt = new Date();
+    createEmployeeDto.updatedAt = new Date();
+    const employee = new Employee(createEmployeeDto);
+    const newEmployee = await this.entityManager.save(employee);
+    return newEmployee;
+  }
+
+  findOne(id: number) {
+    console.log(id);
+    throw new Error('Unimplemented');
+  }
+
+  update(id: number, updateItemDto: UpdateEmployeeData) {
+    console.log({ id, updateItemDto });
+    throw new Error('Unimplemented');
+  }
+
+  delete(id: number) {
+    console.log(id);
+    throw new Error('Unimplemented');
   }
 }
