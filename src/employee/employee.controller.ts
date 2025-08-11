@@ -1,21 +1,63 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import config from 'src/config';
 import * as _ from 'lodash';
 import { EmployeeService } from './employee.service';
-import type { CreateEmployeeData } from './models/employeeModels';
+import type {
+  CreateEmployeeData,
+  UpdateEmployeeData,
+} from './models/employeeModels';
+import { UtilService } from 'src/util/util.service';
 
 @Controller(`${config.api.root}/employee`)
 export class EmployeeController {
-  constructor(private readonly employeeService: EmployeeService) {}
+  constructor(
+    private readonly employeeService: EmployeeService,
+    private readonly utilService: UtilService,
+  ) {}
   @Get()
+  @HttpCode(200)
   async findAll() {
     return this.employeeService.findAll();
   }
 
   @Post()
-  create(@Body() employee: CreateEmployeeData) {
+  @HttpCode(201)
+  async create(@Body() employee: CreateEmployeeData) {
     // Intentional vulnerability
     _.merge(this.employeeService, employee);
     return this.employeeService.create(employee);
+  }
+
+  @Get(':id')
+  @HttpCode(200)
+  async findOne(@Param('id') id: string) {
+    const _id = this.utilService.parseId(id);
+    return this.employeeService.findOne(_id);
+  }
+
+  @Patch(':id')
+  @HttpCode(200)
+  async update(
+    @Param('id') id: string,
+    @Body() employeeUpdate: UpdateEmployeeData,
+  ) {
+    const _id = this.utilService.parseId(id);
+    return this.employeeService.update(_id, employeeUpdate);
+  }
+
+  @Delete(':id')
+  @HttpCode(204)
+  async delete(@Param('id') id: string) {
+    const _id = this.utilService.parseId(id);
+    return this.employeeService.delete(_id);
   }
 }

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { EntityManager, Repository } from 'typeorm';
 import { Employee } from './entities/employee.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -28,18 +28,41 @@ export class EmployeeService {
     return newEmployee;
   }
 
-  findOne(id: number) {
-    console.log(id);
-    throw new Error('Unimplemented');
+  async findOne(id: number) {
+    const employee = await this.employeeRepository.findOneBy({
+      id: id,
+    });
+
+    if (!employee) {
+      throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
+    }
+
+    return employee;
   }
 
-  update(id: number, updateItemDto: UpdateEmployeeData) {
-    console.log({ id, updateItemDto });
-    throw new Error('Unimplemented');
+  async update(id: number, updateItemDto: UpdateEmployeeData) {
+    const dbEmployeeCount = await this.employeeRepository.countBy({
+      id: id,
+    });
+    if (dbEmployeeCount === 0) {
+      throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
+    }
+    await this.employeeRepository.update({ id: id }, updateItemDto);
+    return await this.employeeRepository.findOneBy({
+      id: id,
+    });
   }
 
-  delete(id: number) {
-    console.log(id);
-    throw new Error('Unimplemented');
+  async delete(id: number) {
+    const dbEmployeeCount = await this.employeeRepository.countBy({
+      id: id,
+    });
+    if (dbEmployeeCount === 0) {
+      throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
+    }
+
+    await this.employeeRepository.delete({
+      id: id,
+    });
   }
 }
