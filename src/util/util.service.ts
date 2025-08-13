@@ -28,7 +28,8 @@ export class UtilService {
       throw new HttpException(
         {
           status: HttpStatus.BAD_REQUEST,
-          error: (error.message as string | null | undefined) || 'Bad Request',
+          error: 'Bad Request',
+          message: `${error.message}`,
         },
         HttpStatus.BAD_REQUEST,
         {

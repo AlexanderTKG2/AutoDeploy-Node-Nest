@@ -7,15 +7,14 @@ import {
   Param,
   Patch,
   Post,
+  ValidationPipe,
 } from '@nestjs/common';
 import config from 'src/config';
 import * as _ from 'lodash';
 import { EmployeeService } from './employee.service';
-import type {
-  CreateEmployeeData,
-  UpdateEmployeeData,
-} from './models/employeeModels';
 import { UtilService } from 'src/util/util.service';
+import { CreateEmployeeDTO } from './dto/create-employee.dto';
+import { UpdateEmployeeDTO } from './dto/update-employee.dto';
 
 @Controller(`${config.api.root}/employee`)
 export class EmployeeController {
@@ -31,7 +30,7 @@ export class EmployeeController {
 
   @Post()
   @HttpCode(201)
-  async create(@Body() employee: CreateEmployeeData) {
+  async create(@Body(ValidationPipe) employee: CreateEmployeeDTO) {
     // Intentional vulnerability
     _.merge(this.employeeService, employee);
     return this.employeeService.create(employee);
@@ -48,7 +47,7 @@ export class EmployeeController {
   @HttpCode(200)
   async update(
     @Param('id') id: string,
-    @Body() employeeUpdate: UpdateEmployeeData,
+    @Body(ValidationPipe) employeeUpdate: UpdateEmployeeDTO,
   ) {
     const _id = this.utilService.parseId(id);
     return this.employeeService.update(_id, employeeUpdate);
